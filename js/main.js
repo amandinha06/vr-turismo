@@ -10,28 +10,30 @@ async function loadComponent(name) {
   try {
     const res = await fetch(`components/${name}.html`);
     if (!res.ok) throw new Error(res.status);
-    slot.outerHTML = await res.text();  // troca o marcador pelo conteúdo (sem div sobrando)
+    slot.outerHTML = await res.text();
   } catch (err) {
     console.error(`Não consegui carregar components/${name}.html`, err);
   }
 }
 
-/* ---------- Tudo que depende da página já montada ---------- */
 function init() {
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const header = document.querySelector('.header');
   let lenis = null;
 
-  // "index.html" e "/" são a mesma página
   const norm = (path) => path.replace(/index\.html$/, '');
+  const formatDate = (iso) => (iso ? iso.split('-').reverse().join('/') : 'a definir');
 
-  // Marca no menu a página em que você está
-  document.querySelectorAll('.header__cats a').forEach((a) => {
-    if (a.getAttribute('href') === '#') return;
+  // Marca no menu a página atual
+  const menuLinks = document.querySelectorAll('.header__cats a');
+  menuLinks.forEach((a) => a.classList.remove('is-active'));  // limpa o que estiver fixo no HTML
+
+  menuLinks.forEach((a) => {
+    const href = a.getAttribute('href');
+    if (!href || href === '#') return;
     const url = new URL(a.href, location.href);
-    if (!url.hash && norm(url.pathname) === norm(location.pathname)) {
-      a.classList.add('is-active');
-    }
+    if (url.hash) return;
+    if (norm(url.pathname) === norm(location.pathname)) a.classList.add('is-active');
   });
 
   // Links do WhatsApp
@@ -40,56 +42,106 @@ function init() {
     a.href = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(greeting)}`;
   });
 
-  // Formulário de orçamento (só existe na home)
-  const form = document.querySelector('.quote');
-  if (form) {
-    const modal = document.getElementById('modal');
-    const modalMsg = document.getElementById('modal-msg');
-    const modalSend = document.getElementById('modal-send');
+  /* ---------- Popup com a mensagem do WhatsApp (usado pelos formulários) ---------- */
+  const modal = document.getElementById('modal');
+  const modalMsg = document.getElementById('modal-msg');
+  const modalSend = document.getElementById('modal-send');
 
-    const formatDate = (iso) => (iso ? iso.split('-').reverse().join('/') : 'a definir');
+  function openWhatsModal(message) {
+    modalMsg.textContent = message;
+    modalSend.href = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(message)}`;
+    modal.showModal();
+    if (lenis) lenis.stop();
+  }
 
-    form.elements.ida.addEventListener('change', (e) => {
-      form.elements.volta.min = e.target.value;
-    });
-
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-
-      const destino   = form.elements.destino.value.trim() || 'a definir';
-      const ida       = formatDate(form.elements.ida.value);
-      const volta     = formatDate(form.elements.volta.value);
-      const viajantes = form.elements.viajantes.value || '1';
-
-      const message = [
-        'Olá, VR Turismo! Gostaria de solicitar um orçamento.',
-        '',
-        `Destino: ${destino}`,
-        `Ida: ${ida}`,
-        `Volta: ${volta}`,
-        `Viajantes: ${viajantes}`,
-        '',
-        'Aguardo o contato. Obrigado(a)!'
-      ].join('\n');
-
-      modalMsg.textContent = message;
-      modalSend.href = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(message)}`;
-
-      modal.showModal();
-      if (lenis) lenis.stop();
-    });
-
+  if (modal) {
     modal.addEventListener('close', () => { if (lenis) lenis.start(); });
     modal.querySelectorAll('[data-close]').forEach((btn) => btn.addEventListener('click', () => modal.close()));
     modal.addEventListener('click', (e) => { if (e.target === modal) modal.close(); });
   }
 
-  // Links para uma seção da MESMA página (#orcamento ou index.html#orcamento estando na home)
+  /* ---------- Formulário rápido da home ---------- */
+  const quick = document.querySelector('.quote');
+  if (quick) {
+    quick.elements.ida.addEventListener('change', (e) => { quick.elements.volta.min = e.target.value; });
+
+    quick.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const f = quick.elements;
+      openWhatsModal([
+        'Olá, VR Turismo! Gostaria de solicitar um orçamento.',
+        '',
+        `Destino: ${f.destino.value.trim() || 'a definir'}`,
+        `Ida: ${formatDate(f.ida.value)}`,
+        `Volta: ${formatDate(f.volta.value)}`,
+        `Viajantes: ${f.viajantes.value || '1'}`,
+        '',
+        'Aguardo o contato. Obrigado(a)!'
+      ].join('\n'));
+    });
+  }
+
+  /* ---------- Formulário completo (orcamento.html) ---------- */
+  const budget = document.getElementById('budget-form');
+  if (budget) {
+    const f = budget.elements;
+    const val = (name) => f[name].value.trim();
+
+        // Veio de uma oferta? Preenche destino, tipo de viagem e mensagem
+    const params = new URLSearchParams(location.search);
+    if (params.get('oferta')) {
+      if (params.get('destino')) f.destino.value = params.get('destino');
+      const tipoParam = params.get('tipo');
+      if (tipoParam) {
+        const radio = budget.querySelector(`input[name="tipo"][value="${tipoParam}"]`);
+        if (radio) radio.checked = true;
+      }
+      f.mensagem.value = `Tenho interesse na oferta "${params.get('oferta')}".`;
+    }
+
+    f.ida.addEventListener('change', (e) => { f.volta.min = e.target.value; });
+
+    budget.addEventListener('submit', (e) => {
+      e.preventDefault();  // a validação nativa (campos obrigatórios) roda antes deste evento
+
+      const tipo = budget.querySelector('input[name="tipo"]:checked');
+      const servicos = [...budget.querySelectorAll('input[name="servicos"]:checked')].map((c) => c.value);
+
+      const linhas = [
+        'Olá, VR Turismo! Gostaria de solicitar um orçamento.',
+        '',
+        'CONTATO',
+        `Nome: ${val('nome')}`,
+        ...(val('email') ? [`E-mail: ${val('email')}`] : []),
+        `WhatsApp/telefone: ${val('telefone')}`,
+        '',
+        'VIAGEM',
+        `Destino: ${val('destino') || 'a definir'}`,
+        `Ida (aprox.): ${formatDate(f.ida.value)}`,
+        `Volta (aprox.): ${formatDate(f.volta.value)}`,
+        ...(tipo ? [`Tipo de viagem: ${tipo.value}`] : []),
+        ...(f.orcamento.value ? [`Faixa de orçamento: ${f.orcamento.value}`] : []),
+        '',
+        'VIAJANTES',
+        `Adultos: ${f.adultos.value || 1}`,
+        `Crianças: ${f.criancas.value || 0}`,
+        ...(val('idades') ? [`Idades/faixas etárias: ${val('idades')}`] : [])
+      ];
+
+      if (servicos.length) linhas.push('', 'SERVIÇOS DE INTERESSE', ...servicos.map((s) => `- ${s}`));
+      if (val('mensagem')) linhas.push('', 'MENSAGEM', val('mensagem'));
+      linhas.push('', 'Aguardo o contato. Obrigado(a)!');
+
+      openWhatsModal(linhas.join('\n'));
+    });
+  }
+
+  /* ---------- Links para uma seção da mesma página ---------- */
   document.querySelectorAll('a[href*="#"]').forEach((link) => {
     link.addEventListener('click', (e) => {
       const url = new URL(link.href, location.href);
       if (!url.hash || url.hash.length < 2) return;
-      if (norm(url.pathname) !== norm(location.pathname)) return;  // é outra página: segue normal
+      if (norm(url.pathname) !== norm(location.pathname)) return;
       const target = document.querySelector(url.hash);
       if (!target) return;
       e.preventDefault();
@@ -98,7 +150,13 @@ function init() {
     });
   });
 
-  // Animações
+  // Se a URL tem #seção (vindo de outra página), vai até ela depois do header carregar
+  if (location.hash) {
+    const alvo = document.querySelector(location.hash);
+    if (alvo) alvo.scrollIntoView();
+  }
+
+  /* ---------- Animações ---------- */
   if (!reduceMotion) {
     lenis = new Lenis();
     lenis.on('scroll', ScrollTrigger.update);
@@ -122,5 +180,4 @@ function init() {
   }
 }
 
-/* ---------- Ordem: carrega header e footer, depois inicia o resto ---------- */
 Promise.all([loadComponent('header'), loadComponent('footer')]).then(init);

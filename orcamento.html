@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Orçamento | VR Turismo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div data-include="header"></div>
+
+  <section class="hero">
+    <div class="hero__band">
+      <h1 class="hero__title" data-hero>
+        Conte para a gente como imagina <span>sua próxima viagem.</span>
+      </h1>
+      <p class="hero__lead" data-hero>
+        Quanto mais soubermos sobre destino, datas e preferências, melhor poderemos
+        entender sua necessidade e preparar uma proposta.
+      </p>
+    </div>
+
+    <form class="budget" id="budget-form" data-hero>
+
+      <!-- 1. DADOS -->
+      <fieldset>
+        <legend>Seus dados</legend>
+        <div class="fields fields--3">
+          <div class="field">
+            <label for="nome">Nome *</label>
+            <input id="nome" name="nome" type="text" autocomplete="name" required>
+          </div>
+          <div class="field">
+            <label for="email">E-mail</label>
+            <input id="email" name="email" type="email" autocomplete="email">
+          </div>
+          <div class="field">
+            <label for="telefone">WhatsApp/telefone *</label>
+            <input id="telefone" name="telefone" type="tel" autocomplete="tel" placeholder="(DDD) 90000-0000" required>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- 2. VIAGEM -->
+      <fieldset>
+        <legend>Sua viagem</legend>
+        <div class="fields fields--3">
+          <div class="field field--wide">
+            <label for="destino">Destino desejado</label>
+            <input id="destino" name="destino" type="text" placeholder="Para onde você quer ir? Se não souber, deixe em branco (a definir)">
+          </div>
+          <div class="field">
+            <label for="ida">Ida (data aproximada)</label>
+            <input id="ida" name="ida" type="date">
+          </div>
+          <div class="field">
+            <label for="volta">Volta (data aproximada)</label>
+            <input id="volta" name="volta" type="date">
+          </div>
+          <div class="field">
+            <label for="orcamento">Faixa de orçamento (opcional)</label>
+            <select id="orcamento" name="orcamento">
+              <option value="">Prefiro conversar depois</option>
+              <option>Até R$ 3.000</option>
+              <option>De R$ 3.000 a R$ 6.000</option>
+              <option>De R$ 6.000 a R$ 10.000</option>
+              <option>De R$ 10.000 a R$ 20.000</option>
+              <option>Acima de R$ 20.000</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <p class="field-label" id="tipo-label">Tipo de viagem</p>
+          <div class="choices" role="radiogroup" aria-labelledby="tipo-label">
+            <label class="choice"><input type="radio" name="tipo" value="Em grupo"><span>Em grupo</span></label>
+            <label class="choice"><input type="radio" name="tipo" value="Família"><span>Família</span></label>
+            <label class="choice"><input type="radio" name="tipo" value="Casal"><span>Casal</span></label>
+            <label class="choice"><input type="radio" name="tipo" value="Individual"><span>Individual</span></label>
+            <label class="choice"><input type="radio" name="tipo" value="Cruzeiro"><span>Cruzeiro</span></label>
+            <label class="choice"><input type="radio" name="tipo" value="Intercâmbio"><span>Intercâmbio</span></label>
+            <label class="choice"><input type="radio" name="tipo" value="Outra"><span>Outra</span></label>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- 3. VIAJANTES -->
+      <fieldset>
+        <legend>Viajantes</legend>
+        <div class="fields fields--3">
+          <div class="field">
+            <label for="adultos">Adultos</label>
+            <input id="adultos" name="adultos" type="number" min="1" value="1">
+          </div>
+          <div class="field">
+            <label for="criancas">Crianças</label>
+            <input id="criancas" name="criancas" type="number" min="0" value="0">
+          </div>
+          <div class="field">
+            <label for="idades">Idades relevantes (opcional)</label>
+            <input id="idades" name="idades" type="text" placeholder="Ex.: crianças de 4 e 9 anos">
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- 4. SERVIÇOS -->
+      <fieldset>
+        <legend>Serviços de interesse</legend>
+        <div class="choices" role="group" aria-label="Serviços de interesse">
+          <label class="choice"><input type="checkbox" name="servicos" value="Passagens aéreas"><span>Passagens aéreas</span></label>
+          <label class="choice"><input type="checkbox" name="servicos" value="Hospedagem e resorts"><span>Hospedagem e resorts</span></label>
+          <label class="choice"><input type="checkbox" name="servicos" value="Pacotes turísticos"><span>Pacotes turísticos</span></label>
+          <label class="choice"><input type="checkbox" name="servicos" value="Roteiro personalizado"><span>Roteiro personalizado</span></label>
+          <label class="choice"><input type="checkbox" name="servicos" value="Seguro viagem"><span>Seguro viagem</span></label>
+          <label class="choice"><input type="checkbox" name="servicos" value="Vistos e documentação"><span>Vistos e documentação</span></label>
+          <label class="choice"><input type="checkbox" name="servicos" value="Locação de veículos e transfers"><span>Locação de veículos e transfers</span></label>
+          <label class="choice"><input type="checkbox" name="servicos" value="Ingressos e atrações"><span>Ingressos e atrações</span></label>
+          <label class="choice"><input type="checkbox" name="servicos" value="Cartão pré-pago e câmbio"><span>Cartão pré-pago e câmbio</span></label>
+        </div>
+      </fieldset>
+
+      <!-- 5. MENSAGEM -->
+      <fieldset>
+        <legend>Mensagem</legend>
+        <div class="field">
+          <label for="mensagem">Conte mais sobre o que você imagina (opcional)</label>
+          <textarea id="mensagem" name="mensagem" rows="5" placeholder="Ritmo da viagem, passeios que não podem faltar, uma data especial..."></textarea>
+        </div>
+      </fieldset>
+
+      <!-- PRIVACIDADE E ENVIO -->
+      <label class="consent">
+        <input type="checkbox" id="privacidade" name="privacidade" required>
+        <span>Li e estou ciente da <a href="privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a>. *</span>
+      </label>
+
+      <p class="form-note">
+        Usaremos as informações enviadas para responder à sua solicitação e preparar o
+        atendimento. Consulte nossa Política de Privacidade para saber como tratamos seus dados.
+      </p>
+      <p class="form-note">
+        Para sua segurança, não envie neste formulário dados de passaporte, documentos
+        pessoais ou informações bancárias. Se forem necessários para a contratação, a equipe
+        indicará um canal apropriado.
+      </p>
+
+      <button type="submit" class="btn">Solicitar orçamento</button>
+    </form>
+  </section>
+
+  <div data-include="footer"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

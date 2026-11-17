@@ -24,6 +24,20 @@ function init() {
   const norm = (path) => path.replace(/index\.html$/, '');
   const formatDate = (iso) => (iso ? iso.split('-').reverse().join('/') : 'a definir');
 
+  // Datas: só de hoje em diante, e a volta nunca antes da ida
+  const hoje = () => new Date().toLocaleDateString('sv-SE');  // AAAA-MM-DD no horário local
+
+  function limitarDatas(ida, volta) {
+    ida.min = hoje();
+    volta.min = hoje();
+
+    ida.addEventListener('change', () => {
+      volta.min = ida.value || hoje();
+      // se a volta ficou antes da nova ida, limpa o campo
+      if (volta.value && volta.value < volta.min) volta.value = '';
+    });
+  }
+
   // Marca no menu a página atual
   const menuLinks = document.querySelectorAll('.header__cats a');
   menuLinks.forEach((a) => a.classList.remove('is-active'));  // limpa o que estiver fixo no HTML
@@ -63,7 +77,7 @@ function init() {
   /* ---------- Formulário rápido da home ---------- */
   const quick = document.querySelector('.quote');
   if (quick) {
-    quick.elements.ida.addEventListener('change', (e) => { quick.elements.volta.min = e.target.value; });
+    limitarDatas(quick.elements.ida, quick.elements.volta);   // <-- troca 1
 
     quick.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -87,7 +101,7 @@ function init() {
     const f = budget.elements;
     const val = (name) => f[name].value.trim();
 
-        // Veio de uma oferta? Preenche destino, tipo de viagem e mensagem
+    // Veio de uma oferta? Preenche destino, tipo de viagem e mensagem
     const params = new URLSearchParams(location.search);
     if (params.get('oferta')) {
       if (params.get('destino')) f.destino.value = params.get('destino');
@@ -99,7 +113,7 @@ function init() {
       f.mensagem.value = `Tenho interesse na oferta "${params.get('oferta')}".`;
     }
 
-    f.ida.addEventListener('change', (e) => { f.volta.min = e.target.value; });
+    limitarDatas(f.ida, f.volta);   // <-- troca 2
 
     budget.addEventListener('submit', (e) => {
       e.preventDefault();  // a validação nativa (campos obrigatórios) roda antes deste evento

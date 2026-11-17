@@ -85,7 +85,6 @@ a { color: inherit; text-decoration: none; }
   .quote { grid-template-columns: 1fr 1fr; }
   .quote .field:first-child, .quote .btn { grid-column: 1 / -1; }
   .cards { grid-template-columns: 1fr; }
-  .header__links { display: none; }
 }
 
 :root { --green-text: #4a7316; }  /* verde escuro, legível como texto no branco */
@@ -659,4 +658,60 @@ a { color: inherit; text-decoration: none; }
 }
 @media (max-width: 600px) {
   .trip__facts, .trip-cols { grid-template-columns: 1fr; }
+}
+
+/* ---------- Correções para Safari / iPhone ---------- */
+
+/* Nada de rolagem lateral (clip não quebra o menu fixo, ao contrário de hidden) */
+html, body { overflow-x: clip; }
+
+/* Deixa os campos encolherem dentro das grades */
+.field { min-width: 0; }
+.field input, .field select, .field textarea {
+  min-width: 0;
+  max-width: 100%;
+  font-size: 16px;  /* abaixo de 16px o iPhone dá zoom ao tocar no campo */
+}
+
+/* Campo de data: tira o visual cinza do iOS e dá altura mesmo vazio */
+.field input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  min-height: 3.1rem;
+  background-color: #fff;
+  text-align: left;
+}
+.field input[type="date"]::-webkit-date-and-time-value { text-align: left; }
+
+/* Grades que podem encolher (minmax(0, 1fr) em vez de 1fr) */
+.fields--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+@media (max-width: 900px) {
+  .quote { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .fields--3 { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Telas bem estreitas: um campo por linha */
+@media (max-width: 480px) {
+  .quote { grid-template-columns: minmax(0, 1fr); padding: 1.4rem; }
+}
+
+/* ---------- Cabeçalho no celular ---------- */
+@media (max-width: 600px) {
+  .header__top { padding: .6rem 5vw; gap: 1rem; }
+  .header__logo { width: 52px; height: 52px; }
+  .header__links { display: flex; gap: 1.1rem; }  /* garante que os links apareçam, mesmo se a linha antiga continuar lá */
+  .header__links a { margin-left: 0; font-size: .85rem; white-space: nowrap; }
+}
+
+/* Menu de baixo: em telas de toque a barra de rolagem some (o dedo já rola) */
+@media (hover: none) {
+  .header__cats { scrollbar-width: none; }
+  .header__cats::-webkit-scrollbar { display: none; }
+}
+
+/* Em notebooks menores, aperta um pouco o menu para caber mais itens */
+@media (max-width: 1300px) {
+  .header__cats { gap: 1.4rem; }
 }
